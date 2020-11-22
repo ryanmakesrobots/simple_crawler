@@ -3,8 +3,7 @@ import requests
 from lxml import html
 from threading import Thread, Lock
 from db import new_conn
-from time import sleep
-
+import time
 crawled = []
 linktree = []
 to_be_crawled = []
@@ -33,10 +32,10 @@ class Parser(HTMLParser):
                     pass
             else:
                 try:
-                    sleep(1)
                     lock.acquire()
                     acq_page = to_be_crawled[0]
                     to_be_crawled.pop(0)
+                    crawled.append(acq_page)
                     lock.release()
                     self.last_crawled = acq_page
                     page_data = requests.get(acq_page)
@@ -47,6 +46,8 @@ class Parser(HTMLParser):
                      and d != '' and d not in to_be_crawled and d not in crawled]
                     lock.release()
                     global n
+                    print(len(to_be_crawled))
+                    time.sleep(5)
                     if n >= 2000:
                         return 'finished'
                 except Exception as e:
@@ -58,7 +59,6 @@ class Parser(HTMLParser):
         conn, c = new_conn()
         c.execute('''INSERT INTO crawled(url, parent) values(%s, %s)''', (url, self.last_crawled))
         to_be_crawled.append(url)
-        crawled.append(url)
         conn.commit()
 
 p = Parser()
