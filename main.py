@@ -3,6 +3,7 @@ import requests
 from lxml import html
 from threading import Thread, Lock
 from db import new_conn
+from time import sleep
 
 crawled = []
 linktree = []
@@ -32,6 +33,7 @@ class Parser(HTMLParser):
                     pass
             else:
                 try:
+                    sleep(1)
                     lock.acquire()
                     acq_page = to_be_crawled[0]
                     to_be_crawled.pop(0)
